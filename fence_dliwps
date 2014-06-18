@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+import sys
+import pycurl
+import getopt
+import dlipower
+sys.path.append("/usr/share/fence")
+#from fencing import *
+
+def get_power_status(conn, options):
+	# Find out if it's on or off	
+    pass
+	
+def set_power_status(conn, options):
+	# Turn off or on
+    pass
+
+def send_command(conn, options):
+	# Send cmd to web power switch
+    pass
+
+def usage():
+    print "%s -l <user> -a <ip> -p <pass> port=#" % sys.argv[0]
+
+def getOpts():
+	# Get passed in options
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hvl:a:p:", ["help", "login", "ipaddr", "passwd", "port="])
+    except getopt.GetoptError as err:
+        print str(err)
+        usage()
+        sys.exit(2)
+
+    options = {}
+    verbose = False
+    for o, a in opts:
+        if o == "-v":
+            verbose = True
+        elif o in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif o in ("-l", "--login"):
+            options['user'] = a
+        elif o in ("-a", "--ipaddr"):
+            options['ipaddr'] = a
+        elif o in ("-p", "--passwd"):
+            options['passwd'] = a
+        else:
+            assert False, "Unhandled option"
+
+    for x in args:
+        name, value = x.split('=')
+        if name.lower() == "port":
+            options['port'] = value
+        elif name.lower() == "cycletime":
+            options['cycletime'] = value
+        else:
+            print "Unrecognized argument [%s]\n" % name
+
+    if "port" not in options:
+        print "Error: No port specified"
+        sys.exit(3)
+
+    if "cycletime" not in options:
+        options['cycletime'] = 3
+
+    return options
+
+def main():
+
+    options = getOpts()
+
+    switch = dlipower.PowerSwitch(userid=options["user"], password=options["passwd"], hostname=options["ipaddr"], cycletime=options["cycletime"])
+	
+    switch.cycle(outlet=options["port"])
+
+if __name__ == "__main__":
+	main()
